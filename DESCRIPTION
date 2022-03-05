@@ -1,0 +1,45 @@
+Package: lucidum
+Title: Code free GLM and GBM
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Gary",
+           family = "Hemming",
+           role = c("aut", "cre"),
+           email = "garyhemming@me.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Build GLMs and GBMs using an interactive Shiny app.
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Imports:
+    shiny,
+    shinyWidgets,
+    shinydashboard,
+    shinyFiles,
+    shinycssloaders,
+    htmlwidgets,
+    DT,
+    data.table,
+    rhandsontable,
+    fs,
+    plotly,
+    leaflet,
+    sf,
+    lightgbm,
+    DiagrammeR,
+    stringr,
+    broom,
+    splines,
+    statmod,
+    readr,
+    openxlsx,
+    shinyAce,
+    rjson
+Depends: 
+    R (>= 2.10)
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr
