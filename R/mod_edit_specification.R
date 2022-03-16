@@ -43,7 +43,7 @@ edit_specification_ui <- function(id) {
   )
 
 }
-edit_specification_server <- function(id, specification) {
+edit_specification_server <- function(id, specification, type) {
   moduleServer(id, function(input, output, session) {
     output$spec_path <- renderUI({HTML(paste0(' Specification path: <b>',
                                               ifelse(is.null(SPECIFICATION_PATH),
@@ -71,28 +71,60 @@ edit_specification_server <- function(id, specification) {
       }
     })
     observe({
-      volumes <- c('Specifications' = SPECIFICATION_PATH, 'Home' = fs::path_home())
+      if(is.null(SPECIFICATION_PATH) | SPECIFICATION_PATH=='specification path has not been set'){
+        volumes <- c('Home' = fs::path_home())
+      } else {
+        volumes <- c('Specifications' = SPECIFICATION_PATH, 'Home' = fs::path_home())
+      }
       shinyFileChoose(input, "load_specification", roots=volumes, session=session)
       fileinfo <- parseFilePaths(volumes, input$load_specification)
       isolate({
         if (nrow(fileinfo) > 0) {
-          dt <- fread(fileinfo$datapath, header = FALSE)
+          dt <- fread(fileinfo$datapath, header = TRUE, sep = ',')
           # check file for appropriateness
-          output$specification <- rhandsontable::renderRHandsontable({
-            rhandsontable::rhandsontable(
-              dt,
-              selectCallback = TRUE,
-              rowHeaders = FALSE,
-              columnSorting = TRUE,
-              stretchH = "all",
-              height = 533
+          valid_spec <- check_specification(dt, type)
+          if(valid_spec){
+            # ensure correct column formats
+            # valid specification
+            # make logical columns character - otherwise rhandontable will render as logical
+            logical_cols <- names(dt)[which(as.vector(dt[,lapply(.SD, class)]) == "logical")]
+            if(length(logical_cols)>0){
+              dt[, (logical_cols):= lapply(.SD, as.character), .SDcols = logical_cols]
+            }
+            output$specification <- rhandsontable::renderRHandsontable({
+              rhandsontable::rhandsontable(
+                dt,
+                selectCallback = TRUE,
+                rowHeaders = FALSE,
+                columnSorting = TRUE,
+                stretchH = "all",
+                height = 533
               )
-          })
+            })
+            confirmSweetAlert(session = session,
+                              type = 'success',
+                              inputId = "spec_load_OK",
+                              title = paste0(type, ' specification loaded'),
+                              btn_labels = c('OK')
+            )
+          } else {
+            confirmSweetAlert(session = session,
+                              type = 'error',
+                              inputId = "spec_load_error",
+                              title = paste0('Error loading ',type, ' specification'),
+                              text = 'Check file headers',
+                              btn_labels = c('OK')
+                              )
+          }
         }
       })
     })
     observe({
-      volumes <- c('Specifications' = SPECIFICATION_PATH, 'Home' = fs::path_home())
+      if(is.null(SPECIFICATION_PATH) | SPECIFICATION_PATH=='specification path has not been set'){
+        volumes <- c('Home' = fs::path_home())
+      } else {
+        volumes <- c('Specifications' = SPECIFICATION_PATH, 'Home' = fs::path_home())
+      }
       shinyFileSave(input, "save_specification", roots=volumes, session=session)
       fileinfo <- parseSavePath(volumes, input$save_specification)
       if(nrow(fileinfo)>0){

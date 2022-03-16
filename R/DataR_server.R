@@ -1,9 +1,9 @@
 #' @import shinyAce
 DataR_server <- function(input, output, session, d, RVs){
   shinyAce_text_size <- reactiveVal(12)
-  feature_spec <- edit_specification_server('DataR_feature_specification', reactive(RVs$original_feature_spec))
-  kpi_spec <- edit_specification_server('DataR_kpi_specification', reactive(RVs$original_kpi_spec))
-  filter_spec <- edit_specification_server('DataR_filter_specification', reactive(RVs$original_filter_spec))
+  feature_spec <- edit_specification_server('DataR_feature_specification', reactive(RVs$original_feature_spec), 'feature')
+  kpi_spec <- edit_specification_server('DataR_kpi_specification', reactive(RVs$original_kpi_spec), 'kpi')
+  filter_spec <- edit_specification_server('DataR_filter_specification', reactive(RVs$original_filter_spec), 'filter')
   output$DataR_dataset_viewer <- DT::renderDT (server = TRUE, {
     if(!is.null(d()) & !is.null(RVs$train_test_filter) & !is.null(RVs$user_filter)){
       RVs$dt_update
