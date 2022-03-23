@@ -2,11 +2,11 @@ ChartaR_server <- function(input, output, session, d, RVs){
   ChartaR_1W_banding <- reactiveVal(1)
   residual_error_results <- reactiveVal(NULL)
   observeEvent(RVs$filter_spec, ignoreInit = TRUE, {
-    if(!is.null(RVs$filter_spec)){
-      if(RVs$filter_spec[[1]][1]!='no filter'){
-        choices <- c('no filter', RVs$filter_spec[[1]])
-      } else {
-        choices <- RVs$filter_spec[[1]]
+    choices <- RVs$filter_spec[[1]]
+    choices <- choices[!is.na(choices)]
+    if(!is.null(choices)){
+      if(choices[1]!='no filter'){
+        choices <- c('no filter', choices)
       }
       updateSelectInput(session, "ChartaR_filter_list", choices = choices, selected = 'no filter')
     }

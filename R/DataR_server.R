@@ -58,10 +58,10 @@ DataR_server <- function(input, output, session, d, RVs){
   observe({RVs$kpi_spec <- kpi_spec()})
   observe({RVs$filter_spec <- filter_spec()})
   observeEvent(RVs$kpi_spec, ignoreInit = TRUE, ignoreNULL = FALSE, {
-    if(RVs$kpi_spec[['kpi_name']][1]=='User defined'){
-      choices = c(RVs$kpi_spec[['kpi_name']])
-    } else {
-      choices = c(RVs$kpi_spec[['kpi_name']], 'User defined')
+    choices <- RVs$kpi_spec[['kpi_name']]
+    choices <- choices[!is.na(choices)]
+    if(choices[1]!='User defined'){
+      choices = c(choices, 'User defined')
     }
     updateSelectInput(session, inputId = 'sidebar_kpi', label = 'Select KPI', choices = choices)
   })

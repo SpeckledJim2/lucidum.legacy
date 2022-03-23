@@ -344,7 +344,7 @@ BoostaR_server <- function(input, output, session, d, RVs){
   })
   observe({
     model_index <- isolate(BoostaR_model_index())
-    volumes <- c('Home' = fs::path_home())
+    volumes <- c('Home' = fs::path_home(), shinyFiles::getVolumes()())
     shinyFileSave(input, 'BoostaR_save_model', roots=volumes, session=session)
     fileinfo <- parseSavePath(volumes, input$BoostaR_save_model)
     isolate({

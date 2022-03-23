@@ -103,7 +103,6 @@ build_lgbm <- function(d, init_score, response, weight, features, params, SHAP_s
       l_test <- lgb.Dataset.create.valid(l_train, as.matrix(d_test), label = test_response)
       # set the initial score if there is one
       link <- lgbm_objectives[objective==params$objective][['link']]
-
       offset <- NULL
       if(init_score!='none'){
         offset <- d[[init_score]]
@@ -121,56 +120,63 @@ build_lgbm <- function(d, init_score, response, weight, features, params, SHAP_s
         lightgbm::set_field(l_test, 'init_score', offset[rows_include][train_test_non_zero_rows==1])
       }
       # build the model
-      #withProgress(message = 'BoostaR', detail = 'building model', value = 0, {
-        start_time <- Sys.time()
-        lgbm <- lightgbm::lgb.train(
-          params = params,
-          data = l_train,
-          valids = list('train'=l_train,'test'=l_test), # so we score both train and test data
-          callbacks = list(cb.print.period(params$num_iterations)) # callback to enable progressbar to update
+      start_time <- Sys.time()
+      lgbm <- tryCatch({
+        lightgbm::lgb.train(
+        params = params,
+        data = l_train,
+        valids = list('train'=l_train,'test'=l_test), # so we score both train and test data
+        callbacks = list(cb.print.period(params$num_iterations)) # callback to enable progressbar to update
+        )},
+        error = function(e){e}
         )
-        run_time <- Sys.time() - start_time
-      #})
-      # get predictions
-      incProgress(0.05, detail = 'predicting')
-      pred_col_name <- paste0(response, '_lgbm_', idx)
-      residual_col_name <- paste0(response, '_lgbm_res', idx)
-      preds <- stats::predict(lgbm, as.matrix(d_convert$data), rawscore = TRUE)
-      if(!is.null(offset)){
-        # add on the offset
-        preds <- preds + offset[rows_include]
-      }
-      if(link=='log'){
-        preds <- exp(preds)
-      } else if (link=='logit'){
-        preds <- 1/(1+exp(-preds))
-      }
-      y <- d[[response]]
-      if(any(!rows_include)){
-        d[rows_idx, lgbm_prediction := preds]
-        d[rows_idx, (pred_col_name) := preds]
-        d[rows_idx, (residual_col_name) := all_response - preds]
-        d[!rows_idx, lgbm_prediction := 0]
-        d[!rows_idx, (pred_col_name)  := 0]
-        d[!rows_idx, (residual_col_name)  := 0]
+      run_time <- Sys.time() - start_time
+      if('simpleError' %in% class(lgbm)){
+        # something went wrong
+        message <- lgbm$message
+        lgbm <- NULL
       } else {
-        d[, lgbm_prediction := preds]
-        d[, (pred_col_name) := preds]
-        d[, (residual_col_name) := all_response - preds]
-      }
-      # get SHAP values and append to d
-      incProgress(0.05, detail = 'SHAP values')
-      SHAP_cols <- BoostaR_extract_SHAP_values(d_convert$data, lgbm, features, SHAP_sample, rows_idx)
-      SHAP_rows <- SHAP_cols[['idx']]
-      # get rid of any existing SHAP output columns
-      existing_SHAP_cols <- names(d)[grep('_SHAP_', names(d))] # get rid of any existing SHAP columns
-      if(length(existing_SHAP_cols)>0){
-        d[, (existing_SHAP_cols) := NULL]
-      }
-      # append on new SHAP cols
-      if(!is.null(SHAP_cols)){
-        SHAP_names <- names(SHAP_cols[,2:ncol(SHAP_cols)])
-        d[SHAP_rows, (SHAP_names) := SHAP_cols[,2:ncol(SHAP_cols)]]
+        # get predictions
+        incProgress(0.05, detail = 'predicting')
+        pred_col_name <- paste0(response, '_lgbm_', idx)
+        residual_col_name <- paste0(response, '_lgbm_res', idx)
+        preds <- stats::predict(lgbm, as.matrix(d_convert$data), rawscore = TRUE)
+        if(!is.null(offset)){
+          # add on the offset
+          preds <- preds + offset[rows_include]
+        }
+        if(link=='log'){
+          preds <- exp(preds)
+        } else if (link=='logit'){
+          preds <- 1/(1+exp(-preds))
+        }
+        y <- d[[response]]
+        if(any(!rows_include)){
+          d[rows_idx, lgbm_prediction := preds]
+          d[rows_idx, (pred_col_name) := preds]
+          d[rows_idx, (residual_col_name) := all_response - preds]
+          d[!rows_idx, lgbm_prediction := 0]
+          d[!rows_idx, (pred_col_name)  := 0]
+          d[!rows_idx, (residual_col_name)  := 0]
+        } else {
+          d[, lgbm_prediction := preds]
+          d[, (pred_col_name) := preds]
+          d[, (residual_col_name) := all_response - preds]
+        }
+        # get SHAP values and append to d
+        incProgress(0.05, detail = 'SHAP values')
+        SHAP_cols <- BoostaR_extract_SHAP_values(d_convert$data, lgbm, features, SHAP_sample, rows_idx)
+        SHAP_rows <- SHAP_cols[['idx']]
+        # get rid of any existing SHAP output columns
+        existing_SHAP_cols <- names(d)[grep('_SHAP_', names(d))] # get rid of any existing SHAP columns
+        if(length(existing_SHAP_cols)>0){
+          d[, (existing_SHAP_cols) := NULL]
+        }
+        # append on new SHAP cols
+        if(!is.null(SHAP_cols)){
+          SHAP_names <- names(SHAP_cols[,2:ncol(SHAP_cols)])
+          d[SHAP_rows, (SHAP_names) := SHAP_cols[,2:ncol(SHAP_cols)]]
+        }
       }
     }
   }

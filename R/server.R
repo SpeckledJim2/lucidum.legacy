@@ -88,7 +88,13 @@ server <- function(input, output, session) {
         ks <- RVs$kpi_spec
       }
       kpi_components <- kpi_numerator_denominator(input$sidebar_kpi, ks)
-      if(kpi_components$numerator %in% names(d()) & kpi_components$denominator %in% c('N', 'no weights', names(d()))){
+      # check that a kpi with valid components has been selected
+      kpi_present <- length(kpi_components$numerator)>0 & length(kpi_components$denominator)>0
+      if(kpi_present){
+        kpi_present <- kpi_components$numerator %in% names(d()) & kpi_components$denominator %in% c('N', 'no weights', names(d()))
+      }
+      if(kpi_present){
+      #if(kpi_components$numerator %in% names(d()) & kpi_components$denominator %in% c('N', 'no weights', names(d()))){
         updateSelectInput(session, inputId = 'response', selected = kpi_components$numerator)
         updateSelectInput(session, inputId = 'weight', selected = kpi_components$denominator)
       } else {

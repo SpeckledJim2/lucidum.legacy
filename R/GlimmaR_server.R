@@ -78,7 +78,7 @@ GlimmaR_server <- function(input, output, session, d, RVs){
     session$sendCustomMessage("glm_formula_text_size", paste(sep = '', GlimmaR_text_size(), 'px'))
   })
   observeEvent(input$GlimmaR_formula_save, {
-    volumes <- c('Home' = fs::path_home())
+    volumes <- c('Home' = fs::path_home(), shinyFiles::getVolumes()())
     shinyFileSave(input, "GlimmaR_formula_save", roots=volumes, session=session)
     fileinfo <- parseSavePath(volumes, input$GlimmaR_formula_save)
     if (nrow(fileinfo) > 0) {
@@ -88,7 +88,7 @@ GlimmaR_server <- function(input, output, session, d, RVs){
     }
   })
   observeEvent(input$GlimmaR_formula_load, {
-    volumes <- c('Home' = fs::path_home())
+    volumes <- c('Home' = fs::path_home(), shinyFiles::getVolumes()())
     shinyFileChoose(input, "GlimmaR_formula_load", roots=volumes, session=session)
     fileinfo <- parseFilePaths(volumes, input$GlimmaR_formula_load)
     if (nrow(fileinfo) > 0) {
@@ -186,7 +186,7 @@ GlimmaR_server <- function(input, output, session, d, RVs){
     }
   })
   observe({
-    volumes <- c('Home' = fs::path_home())
+    volumes <- c('Home' = fs::path_home(), shinyFiles::getVolumes()())
     shinyFileSave(input, 'GlimmaR_save_model', roots=volumes, session=session)
     fileinfo <- parseSavePath(volumes, input$GlimmaR_save_model)
     isolate({
@@ -328,12 +328,13 @@ GlimmaR_server <- function(input, output, session, d, RVs){
   })
   observeEvent(input$GlimmaR_export_tables, {
     # get the filename
-    volumes <- c('Home' = fs::path_home())
+    volumes <- c('Home' = fs::path_home(), shinyFiles::getVolumes()())
     shinyFileSave(input, "GlimmaR_export_tables", roots=volumes, session=session)
     fileinfo <- parseSavePath(volumes, input$GlimmaR_export_tables)
-    m_idx <- as.numeric(input$GlimmaR_model_chooser)
-    g_tabulated <- RVs$GlimmaR_models[[m_idx]]$tabulated_model
-    # create and save the file
+    if(!is.null(input$GlimmaR_model_chooser)){
+      m_idx <- as.numeric(input$GlimmaR_model_chooser)
+      g_tabulated <- RVs$GlimmaR_models[[m_idx]]$tabulated_model
+      # create and save the file
       if(length(fileinfo$datapath)>0){
         if(is.null(g_tabulated)){
           confirmSweetAlert(session = session,
@@ -399,13 +400,6 @@ GlimmaR_server <- function(input, output, session, d, RVs){
               n <- nrow(concatenated_table) + 1
               addStyle(wb, sheet = ws, rows = 1:n, cols = 1:5, style = createStyle(halign = 'left'), gridExpand = TRUE, stack = TRUE)
               addStyle(wb, sheet = ws, rows = 1:n, cols = 6:10, style = createStyle(halign = 'right'), gridExpand = TRUE, stack = TRUE)
-              # if(input$GlimmaR_export_number_format=='None'){
-              #   addStyle(wb, sheet = ws, rows = 1:n, cols = 6:7, style = createStyle(numFmt = '0.0000'), gridExpand = TRUE, stack = TRUE)
-              # } else if(input$GlimmaR_export_number_format=='%'){
-              #   addStyle(wb, sheet = ws, rows = 1:n, cols = 6:7, style = createStyle(numFmt = '0.0%'), gridExpand = TRUE, stack = TRUE)
-              # } else if(input$GlimmaR_export_number_format=='$'){
-              #   addStyle(wb, sheet = ws, rows = 1:n, cols = 6:7, style = createStyle(numFmt = '$#,##0'), gridExpand = TRUE, stack = TRUE)
-              # }
               addStyle(wb, sheet = ws, rows = 1:n, cols = 8, style = createStyle(numFmt = '#,##0'), gridExpand = TRUE, stack = TRUE)
               addStyle(wb, sheet = ws, rows = 1:n, cols = 9:10, style = createStyle(numFmt = '0.0000'), gridExpand = TRUE, stack = TRUE)
               # save and confirm - can take a few seconds so use withProgress
@@ -421,5 +415,6 @@ GlimmaR_server <- function(input, output, session, d, RVs){
           }
         }
       }
+    }
   }
 )}

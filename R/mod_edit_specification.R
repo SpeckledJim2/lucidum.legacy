@@ -72,9 +72,9 @@ edit_specification_server <- function(id, specification, type) {
     })
     observe({
       if(is.null(SPECIFICATION_PATH) | SPECIFICATION_PATH=='specification path has not been set'){
-        volumes <- c('Home' = fs::path_home())
+        volumes <- c('Home' = fs::path_home(), shinyFiles::getVolumes()())
       } else {
-        volumes <- c('Specifications' = SPECIFICATION_PATH, 'Home' = fs::path_home())
+        volumes <- c('Specifications' = SPECIFICATION_PATH, 'Home' = fs::path_home(), shinyFiles::getVolumes()())
       }
       shinyFileChoose(input, "load_specification", roots=volumes, session=session)
       fileinfo <- parseFilePaths(volumes, input$load_specification)
@@ -121,9 +121,9 @@ edit_specification_server <- function(id, specification, type) {
     })
     observe({
       if(is.null(SPECIFICATION_PATH) | SPECIFICATION_PATH=='specification path has not been set'){
-        volumes <- c('Home' = fs::path_home())
+        volumes <- c('Home' = fs::path_home(), shinyFiles::getVolumes()())
       } else {
-        volumes <- c('Specifications' = SPECIFICATION_PATH, 'Home' = fs::path_home())
+        volumes <- c('Specifications' = SPECIFICATION_PATH, 'Home' = fs::path_home(), shinyFiles::getVolumes()())
       }
       shinyFileSave(input, "save_specification", roots=volumes, session=session)
       fileinfo <- parseSavePath(volumes, input$save_specification)
