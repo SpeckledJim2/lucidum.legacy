@@ -57,7 +57,7 @@ viz_render_map <- function(map,
     if(!is.null(sector_summary)){
       setDF(sector_summary)
       if(weight=='no weights'){
-        sector_summary$area_plot <- sector_summary[,3]
+        sector_summary$sector_plot <- sector_summary[,3]
       } else {
         sector_summary$sector_plot <- sector_summary[,3]/sector_summary[,2]
       }
@@ -153,7 +153,7 @@ viz_render_map <- function(map,
                    weight = 0,
                    stroke = FALSE,
                    fill = TRUE,
-                   fillColor = ~pal_unit(units_sf$unit_plot),
+                   fillColor = unit_fillColor,
                    fillOpacity = ifelse(is.na(units_sf$unit_plot),0.5,1.0),
                    highlightOptions = highlightOptions(color='white', opacity = 1, weight = 1, fillOpacity = 1, bringToFront = TRUE, sendToBack = TRUE),
                    group = "Unit",
