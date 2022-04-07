@@ -48,7 +48,7 @@ ChartaR_ui <- function(){
                                   radioGroupButtons(
                                     inputId = "ChartaR_1W_banding",
                                     label = "Banding",
-                                    choices = c('<','0.01','0.1','1','5','10','50','100','>'),
+                                    choices = c('<','0.01','0.1','1','5','10','100','>',`<i class='fa fa-lock'></i>` = 'lock'),
                                     individual = FALSE,
                                     size = 'xs',
                                     selected = -1)

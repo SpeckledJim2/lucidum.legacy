@@ -85,7 +85,16 @@ viz_one_way_chart <- function(d, response, weight, show_labels, show_response, e
     yform2$overlaying <- 'y'
     yform2$side <- 'left'
     #yform2$range <- return_y_axis_limits(d[[first_line_col]])
-    yform2$range <- return_y_axis_limits(as.matrix(d[,first_line_col:last_line_col]))
+    if(show_response=='Show'){
+      yform2$range <- return_y_axis_limits(as.matrix(d[,first_line_col:ncol(d)]))
+    } else if (show_response=='Hide'){
+      if(ncol(d)==last_line_col){
+        col <- first_line_col
+      } else {
+        col <- last_line_col+1
+      }
+      yform2$range <- return_y_axis_limits(as.matrix(d[,col:ncol(d)]))
+    }
     yform2$showgrid <- TRUE
     yform2$title <- boldify(names(d)[first_line_col])
     # add the bars, with distinct colours for NA and X

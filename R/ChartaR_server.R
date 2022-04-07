@@ -14,12 +14,16 @@ ChartaR_server <- function(input, output, session, d, RVs){
   observeEvent(input$ChartaR_1W_banding, ignoreInit = TRUE, {
     x <- input$ChartaR_1W_banding
     b <- ChartaR_1W_banding()
+    sel <- character(0)
     if(!is.null(x)){
       if(length(x)>0){
         if(x=='<'){
           ChartaR_1W_banding(modify_banding_level(b, -1))
         } else if (x=='>'){
           ChartaR_1W_banding(modify_banding_level(b, +1))
+        } else if (x=='lock'){
+          # do nothing - leave banding unchanged
+          sel <- 'lock'
         } else if (x %in% c('0.01','0.1','1','5','10','50','100')){
           ChartaR_1W_banding(as.numeric(x))
         }
@@ -28,7 +32,7 @@ ChartaR_server <- function(input, output, session, d, RVs){
         updateRadioGroupButtons(session,
                                 inputId = 'ChartaR_1W_banding',
                                 label = paste0('Banding (',t,')'),
-                                selected = character(0)
+                                selected = sel
         )
       }
     }
@@ -277,22 +281,32 @@ ChartaR_server <- function(input, output, session, d, RVs){
   )
   observeEvent(one_way_x_axis_feature(), ignoreInit = TRUE, {
     if(!is.null(d())){
+      sel <- character(0)
       if(is.numeric(d()[[one_way_x_axis_feature()]]) | class(d()[[one_way_x_axis_feature()]])[1] %in% c('IDate','Date','POSIXct')){
-        b <- banding_guesser(d()[[one_way_x_axis_feature()]])
+        if(!is.null(input$ChartaR_1W_banding)){
+          if(input$ChartaR_1W_banding=='lock'){
+            b <- ChartaR_1W_banding()
+            sel <- 'lock'
+          } else {
+            b <- banding_guesser(d()[[one_way_x_axis_feature()]])
+          }
+        } else {
+          b <- banding_guesser(d()[[one_way_x_axis_feature()]])
+        }
         ChartaR_1W_banding(b)
         date_response <- class(d()[[input[['ChartaR_x_axis_feature-selectInput']]]])[1] %in% c('IDate','Date','POSIXct')
         t <- banding_displayed(ChartaR_1W_banding(), date_response)
         updateRadioGroupButtons(session,
                                 inputId = 'ChartaR_1W_banding',
                                 label = paste0('Banding (',t,')'),
-                                selected = character(0)
+                                selected = sel
         )
       } else {
         ChartaR_1W_banding(1)
         updateRadioGroupButtons(session,
                                 inputId = 'ChartaR_1W_banding',
                                 label = paste0('Non-numerical feature'),
-                                selected = character(0)
+                                selected = sel
         )
       }
     }
