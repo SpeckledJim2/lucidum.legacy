@@ -398,8 +398,20 @@ BoostaR_server <- function(input, output, session, d, RVs){
     })
     # update the SHAP feature selectInputs to contain the features from the most recent model
     features <- RVs$BoostaR_models[[model_index]][['importances']][['Feature']]
-    updateSelectInput(session, inputId = 'BoostaR_SHAP_feature_1', choices = features)
-    updateSelectInput(session, inputId = 'BoostaR_SHAP_feature_2', choices = c('none', features))
+    f1_sel <- input$BoostaR_SHAP_feature_1
+    f2_sel <- input$BoostaR_SHAP_feature_2
+    if(!is.null(f1_sel)){
+      if(!(f1_sel %in% features)){
+        f1_sel <- NULL
+      }
+    }
+    if(!is.null(f2_sel)){
+      if(!(f2_sel %in% c('none', features))){
+        f2_sel <- NULL
+      }
+    }
+    updateSelectInput(session, inputId = 'BoostaR_SHAP_feature_1', choices = features, selected = f1_sel)
+    updateSelectInput(session, inputId = 'BoostaR_SHAP_feature_2', choices = c('none', features), selected = f2_sel)
   })
   observeEvent(c(d(), RVs$dt_update), {
     updateSelectInput(session, inputId = 'BoostaR_initial_score', choices = c('none', numerical_cols(d())))
@@ -432,6 +444,7 @@ BoostaR_server <- function(input, output, session, d, RVs){
     SHAP_1 <- NULL
     SHAP_2 <- NULL
     cor <- NULL
+    BoostaR_model_index() # so recalcs when this is changed
     f1 <- input$BoostaR_SHAP_feature_1
     f2 <- input$BoostaR_SHAP_feature_2
     weight <- input$weight
@@ -471,6 +484,7 @@ BoostaR_server <- function(input, output, session, d, RVs){
   })
   output$BoostaR_SHAP_plot <- plotly::renderPlotly({
     # plot for most recent model
+    BoostaR_model_index() # so recalcs when this is changed
     if(length(RVs$BoostaR_models)>0){
       lgbm <- RVs$BoostaR_models[[length(RVs$BoostaR_models)]]
       viz_SHAP_chart(d(),
