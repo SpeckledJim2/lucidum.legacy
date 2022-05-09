@@ -1,7 +1,6 @@
 #' @import lightgbm
 #' @import DiagrammeR
 #' @import stringr
-#' @import rjson
 BoostaR_server <- function(input, output, session, d, RVs){
   # gbm_features holds whatever features are selected in input$BoostaR_features
   BoostaR_feature_table <- reactiveVal(NULL) # holds the contents of input$BoostaR_features

@@ -572,19 +572,19 @@ create_gain_summary_from_tree_summary <- function(trees){
   names(summary) <- c('tree_features','dim','gain','%')
   return(summary)
 }
-BoostaR_predict <- function(d, RVs, idx, predict_col_name){
-  result <- FALSE
-  if(idx<=length(RVs$BoostaR_models) & class(d)[1]=='data.table'){
-    b <- RVs$BoostaR_models[[idx]]
-    model_features <- rjson::fromJSON(b$lgbm$dump_model())$feature_names
-    if(all(model_features %in% names(d))){
-      dat <- lgb.convert_with_rules(d[,.SD, .SDcols = model_features], rules = b$rules)
-      d[, (predict_col_name) := stats::predict(b$lgbm, as.matrix(dat$data))]
-      result <- TRUE
-    }
-  }
-  return(result)
-}
+# BoostaR_predict <- function(d, RVs, idx, predict_col_name){
+#   result <- FALSE
+#   if(idx<=length(RVs$BoostaR_models) & class(d)[1]=='data.table'){
+#     b <- RVs$BoostaR_models[[idx]]
+#     model_features <- rjson::fromJSON(b$lgbm$dump_model())$feature_names
+#     if(all(model_features %in% names(d))){
+#       dat <- lgb.convert_with_rules(d[,.SD, .SDcols = model_features], rules = b$rules)
+#       d[, (predict_col_name) := stats::predict(b$lgbm, as.matrix(dat$data))]
+#       result <- TRUE
+#     }
+#   }
+#   return(result)
+# }
 band_var <- function(x, q, b){
   lower_cutoff <- stats::quantile(x, prob = q, na.rm = TRUE)
   upper_cutoff <- stats::quantile(x, prob = 1-q, na.rm = TRUE)

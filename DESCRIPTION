@@ -1,6 +1,6 @@
 Package: lucidum
 Title: Code free GLM and GBM
-Version: 0.0.0.9004
+Version: 0.0.0.9005
 Authors@R: 
     person(given = "Gary",
            family = "Hemming",
@@ -35,8 +35,7 @@ Imports:
     statmod,
     readr,
     openxlsx,
-    shinyAce,
-    rjson
+    shinyAce
 Depends: 
     R (>= 2.10)
 Suggests: 
