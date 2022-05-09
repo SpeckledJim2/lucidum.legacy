@@ -247,12 +247,17 @@ BoostaR_server <- function(input, output, session, d, RVs){
         monotonicity_constraints <- convert_monotonicity_column(BoostaR_feature_table()[include==TRUE, monotonicity])
       }
       # set the feature interaction constraints
-      groups_to_constrain <- input$BoostaR_interaction_contraints
-      if(!is.null(groups_to_constrain)){
-        #feature_interaction_constraints <- set_feature_interaction_constraints(features, RVs$feature_spec, groups_to_constrain)
-        feature_interaction_constraints <- set_feature_interaction_constraints_new(original_feature_table, groups_to_constrain)
+      if(input$BoostaR_use_custom_interaction_constraints==TRUE){
+        # extract the fics from the textAreaInput BoostaR_custom_interaction_constraints
+        feature_interaction_constraints <- make_custom_fics(input$BoostaR_custom_interaction_constraints, features)
       } else {
-        feature_interaction_constraints <- NULL
+        groups_to_constrain <- input$BoostaR_interaction_contraints
+        if(!is.null(groups_to_constrain)){
+          #feature_interaction_constraints <- set_feature_interaction_constraints(features, RVs$feature_spec, groups_to_constrain)
+          feature_interaction_constraints <- set_feature_interaction_constraints_new(original_feature_table, groups_to_constrain)
+        } else {
+          feature_interaction_constraints <- NULL
+        }
       }
       # loop over parameter combinations
       if(input$BoostaR_grid_search=='Off'){
@@ -307,7 +312,9 @@ BoostaR_server <- function(input, output, session, d, RVs){
             gain_summary <- create_gain_summary_from_tree_summary(tree_table)
             gain_summary <- gain_summary[order(-gain_summary$gain),]
             # create feature interaction constraint SHAP cols
-            BoostaR_create_SHAP_indices(d(), feature_interaction_constraints, model_index)
+            if(input$BoostaR_calculate_SHAP_values!='No'){
+              BoostaR_create_SHAP_indices(d(), feature_interaction_constraints, model_index)
+            }
             # add the model and associated stats to RVs$BoostaR_models
             BoostaR_model <- list(idx = model_index,
                                   run_time = lgbm_results$run_time,

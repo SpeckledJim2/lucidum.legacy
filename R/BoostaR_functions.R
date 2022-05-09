@@ -229,6 +229,20 @@ extract_additional_lgbm_parameters <- function(x){
   names(result) <- lapply(x, utils::head, n = 1)
   result <- lapply(result, convert_numerics)
 }
+make_custom_fics <- function(x, features){
+  x <- unlist(strsplit(x, '\n'))
+  x <- gsub(' ','', x)
+  if(length(grep('#', x))>0){
+    x <- x[-grep('#', x)]
+  }
+  fics <- strsplit(x, 'x')
+  # include all the features as one-way terms
+  # so these will still be included in the model
+  fics <- c(fics, features)
+  # only keep fics that involve features
+  keep <- sapply(fics, function(x){all(x %in% features)})
+  fics <- fics[keep]
+}
 update_BoostaR_feature_grid <- function(dt, height){
   rhandsontable(
     dt,

@@ -8,8 +8,35 @@ BoostaR_ui <- function(){
                          width = 6,
                          fluidRow(
                            column(
-                             width = 12,
-                             h3('Feature scenarios & interaction constraints')
+                             width = 9,
+                             h3('Feature scenarios & interactions')
+                           ),
+                           column(
+                             width = 3,
+                             style = 'margin-top:16px; padding-right:16px; padding-bottom:0px',
+                             align = 'right',
+                             dropdownButton(
+                               inputId = 'BoostaR_fics_dropdown',
+                               right = TRUE,
+                               up = FALSE,
+                               circle = FALSE,
+                               label = 'Custom',
+                               margin = "20px",
+                               inline = TRUE,
+                               checkboxInput(inputId = "BoostaR_use_custom_interaction_constraints",label = "Apply custom feature interaction constraints", value = FALSE),
+                               textAreaInput(
+                                 inputId = 'BoostaR_custom_interaction_constraints',
+                                 value =
+                                   '# seperate features with "x"
+# any features selected for the model
+# not included in an interaction constraint
+# will be fitted with no interaction terms',
+                                 label = 'Specify interactions',
+                                 width = '520px',
+                                 height = '600px',
+                                 resize = 'vertical'
+                               )
+                               )
                            )
                          ),
                          fluidRow(
