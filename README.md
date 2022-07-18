@@ -42,7 +42,7 @@ lucidum's functionality includes:
   - provide a simple user interface for GBM feature selection
   - provide a simple user interface to the most common LightGBM parameters
   - build GA2M models (1D+2D GBMs) to support interaction detection
-  - use feature interaction contraints to build indices for high cardinality features like postcode
+  - use feature interaction constraints to build indices for high cardinality features like postcode
   - 1D SHAP plots to interpret the model's main effects
   - 2D SHAP plots to  interpret interaction effects  
   

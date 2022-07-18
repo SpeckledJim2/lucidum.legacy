@@ -130,6 +130,26 @@ BoostaR_server <- function(input, output, session, d, RVs){
       }
     }
   })
+  observeEvent(input$BoostaR_add_features, {
+    if(!is.null(BoostaR_feature_table())){
+      dt <- BoostaR_feature_table()
+      # don't include the response or the weight, _SHAP_ or _LP_
+      features <- dt[['feature']]
+      features <- setdiff(features, input$response)
+      if(input$weight!='N'){
+        features <- setdiff(features, input$weight)
+      }
+      patterns_to_exclude <- c('_SHAP_','_LP_','glm_','lgbm_','train_test')
+      exclude_features <- dt$feature[dt$feature %like% paste(patterns_to_exclude, collapse="|")]
+      if(length(exclude_features)>0){
+        features <- setdiff(features, exclude_features)
+      }
+      dt[, include := FALSE]
+      dt[feature %in% features, include := TRUE]
+      output$BoostaR_features <- renderRHandsontable({update_BoostaR_feature_grid(dt, input$dimension[2] - 500)})
+      #updateSelectInput(session, inputId = 'BoostaR_feature_specification', selected = character(0))
+    }
+  })
   observeEvent(input$BoostaR_clear_features, {
     if(!is.null(BoostaR_feature_table())){
       dt <- BoostaR_feature_table()
@@ -180,7 +200,7 @@ BoostaR_server <- function(input, output, session, d, RVs){
         inputId = 'BoostaR_num_leaves',
         label = 'Number of leaves',
         min = 2,
-        max = 10,
+        max = 30,
         value = num_leaves,
         step = 1,
         ticks = FALSE,

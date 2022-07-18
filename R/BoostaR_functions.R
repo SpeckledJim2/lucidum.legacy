@@ -900,7 +900,7 @@ update_GBM_parameters <- function(session, output, BoostaR_model){
       inputId = 'BoostaR_num_leaves',
       label = 'Number of leaves',
       min = 2,
-      max = 10,
+      max = 30,
       value = BoostaR_model$main_params$num_leaves,
       step = 1,
       ticks = FALSE,

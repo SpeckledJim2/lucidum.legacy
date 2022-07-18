@@ -74,8 +74,13 @@ BoostaR_ui <- function(){
                              align = 'right',
                              style='margin-top:16px; padding-bottom:0px',
                              actionButton(
+                               inputId = "BoostaR_add_features",
+                               label = 'all',
+                               icon = icon("plus-circle")
+                             ),
+                             actionButton(
                                inputId = "BoostaR_clear_features",
-                               label = 'all features',
+                               label = 'all',
                                icon = icon("minus-circle")
                              ),
                              actionButton(
