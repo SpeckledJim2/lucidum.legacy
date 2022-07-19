@@ -1,6 +1,6 @@
 Package: lucidum
 Title: Code free GLM and GBM
-Version: 0.0.0.9007
+Version: 0.0.0.9008
 Authors@R: 
     person(given = "Gary",
            family = "Hemming",
@@ -24,6 +24,7 @@ Imports:
     data.table,
     rhandsontable,
     fs,
+    sf,
     plotly,
     leaflet,
     lightgbm,

@@ -1,3 +1,4 @@
+#' @import sf
 MappaR_server <- function(input, output, session, d, RVs){
   first_map_redraw <- reactiveVal(TRUE)
   plot_postcode_area <- reactiveVal('E')
