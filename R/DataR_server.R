@@ -35,7 +35,7 @@ DataR_server <- function(input, output, session, d, RVs){
         }
         d_display <- cbind(data.table(col = names(d_display), t(d_display)))
         names(d_display) <- c('dataset_column', as.character(idx))
-        pg_length <- min(1000, nrow(d_display))
+        pg_length <- min(5000, nrow(d_display))
       }
       d_display %>%
         DT::datatable(rownames= FALSE,

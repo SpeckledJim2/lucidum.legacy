@@ -212,6 +212,9 @@ selectInput_choices <- function(selectChooser,
       if('No grouping' %in% n){
         choices <- choices[c(setdiff(n, 'No grouping'), 'No grouping')]
       }
+      if('Search' %in% n){
+        choices <- choices[c('Search', setdiff(n, 'Search'))]
+      }
     } else {
       lucidum_cols <- intersect(c('Recent models','GLM columns','LGBM columns','GLM LP columns','LGBM SHAP columns'), names(choices))
       if('No grouping' %in% n){

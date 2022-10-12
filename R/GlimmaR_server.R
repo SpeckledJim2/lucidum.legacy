@@ -6,12 +6,12 @@
 GlimmaR_server <- function(input, output, session, d, RVs){
   GlimmaR_model_index <- reactiveVal(0)
   GlimmaR_text_size <- reactiveVal(14)
-  observeEvent(c(input$response, input$weight), ignoreInit = TRUE, {
-    if(!is.null(d())){
-      guess <- objective_guesser(d(), input$response, input$weight, 'glm')
-      updateSelectInput(session, inputId = 'GlimmaR_objective', selected = guess)
-    }
-  })
+  # observeEvent(c(input$response, input$weight), ignoreInit = TRUE, {
+  #   if(!is.null(d())){
+  #     guess <- objective_guesser(d(), input$response, input$weight, 'glm')
+  #     updateSelectInput(session, inputId = 'GlimmaR_objective', selected = guess)
+  #   }
+  # })
   observeEvent(c(RVs$GlimmaR_models, GlimmaR_model_index()), ignoreInit = TRUE, {
     # update the GlimmaR summary table
     # update the GBM model summary table

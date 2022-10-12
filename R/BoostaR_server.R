@@ -15,12 +15,12 @@ BoostaR_server <- function(input, output, session, d, RVs){
     updateTabItems(session, inputId = 'tabs', selected = 'BoostaR')
     updateNavbarPage(session = session, inputId = "BoostaR_tabsetPanel", selected = "Model history")
   })
-  observeEvent(c(input$response, input$weight), ignoreInit = TRUE, {
-    if(!is.null(d())){
-      guess <- objective_guesser(d(), input$response, input$weight, 'gbm')
-      updateSelectInput(session, inputId = 'BoostaR_objective', selected = guess)
-    }
-  })
+  # observeEvent(c(input$response, input$weight), ignoreInit = TRUE, {
+  #   if(!is.null(d())){
+  #     guess <- objective_guesser(d(), input$response, input$weight, 'gbm')
+  #     updateSelectInput(session, inputId = 'BoostaR_objective', selected = guess)
+  #   }
+  # })
   observeEvent(input$BoostaR_prev_model, {
     if(length(RVs$BoostaR_models)>0){
       b <- BoostaR_model_index()

@@ -198,7 +198,7 @@ viz_one_way_chart <- function(d, response, weight, show_labels, show_response, e
         )
       }
     }
-    if(user_filter=='no filter'){
+    if(user_filter[1]=='no filter'){
       filter_text <- ''
     } else {
       filter_text <- combine_filters(user_filter, filter_operation)
