@@ -708,7 +708,7 @@ SHAP_box_and_whisker <- function(d, weight, feature_1, banding_1, factor_1, q, c
   } else {
     d_cols[, banded_1 := feature_1]
   }
-  mean_SHAP <- d_cols[, lapply(.SD, mean), by = banded_1, .SDcols = 'SHAP']
+  mean_SHAP <- d_cols[, lapply(.SD, mean, na.rm = TRUE), by = banded_1, .SDcols = 'SHAP']
   # reorder plot by mean_SHAP
   setorderv(mean_SHAP, 'SHAP', order = -1)
   xform <- list(autotick = TRUE,
