@@ -65,7 +65,7 @@ edit_specification_server <- function(id, specification, type) {
                       rowHeaders = FALSE,
                       columnSorting = TRUE,
                       stretchH = "all",
-                      height = 533
+                      height = input$dimension[2] - 500
                     )
                   })
       }
@@ -98,7 +98,7 @@ edit_specification_server <- function(id, specification, type) {
                 rowHeaders = FALSE,
                 columnSorting = TRUE,
                 stretchH = "all",
-                height = 533
+                height = input$dimension[2] - 500
               )
             })
             confirmSweetAlert(session = session,

@@ -106,6 +106,24 @@ DataR_ui <- function(){
                                ),
                                tags$hr(style="border-color: black; margin-bottom: 6px"),
                                edit_specification_ui('DataR_kpi_specification'),
+                               # the code below should go into the module itself!
+                               tags$head(tags$script('
+                                            // Define function to set height of "DataR_kpi_specification-specification"
+                                            setHeight_DataR_kpi_specification = function() {
+                                              var window_height = $(window).height();
+                                              var header_height = $(".main-header").height();
+                                              var boxHeight = (window_height - header_height) - 360;
+                                              $("#DataR_kpi_specification-specification").height(boxHeight);
+                                            };
+                                            // Set input$box_height when the connection is established
+                                            $(document).on("shiny:connected", function(event) {
+                                              setHeight_DataR_kpi_specification();
+                                            });
+                                            // Refresh the box height on every window resize event
+                                            $(window).on("resize", function(){
+                                              setHeight_DataR_kpi_specification();
+                                            });
+                                          '))
                                ),
                       tabPanel('Filter specification',
                                br(),
@@ -133,7 +151,25 @@ DataR_ui <- function(){
                                  )
                                ),
                                tags$hr(style="border-color: black; margin-bottom: 6px"),
-                               edit_specification_ui('DataR_filter_specification')
+                               edit_specification_ui('DataR_filter_specification'),
+                               # the code below should go into the module itself!
+                               tags$head(tags$script('
+                                            // Define function to set height of "DataR_filter_specification-specification"
+                                            setHeight_DataR_filter_specification = function() {
+                                              var window_height = $(window).height();
+                                              var header_height = $(".main-header").height();
+                                              var boxHeight = (window_height - header_height) - 360;
+                                              $("#DataR_filter_specification-specification").height(boxHeight);
+                                            };
+                                            // Set input$box_height when the connection is established
+                                            $(document).on("shiny:connected", function(event) {
+                                              setHeight_DataR_filter_specification();
+                                            });
+                                            // Refresh the box height on every window resize event
+                                            $(window).on("resize", function(){
+                                              setHeight_DataR_filter_specification();
+                                            });
+                                          '))
                       ),
                       tabPanel('Feature specification',
                                br(),
@@ -162,7 +198,25 @@ DataR_ui <- function(){
                                  )
                                ),
                                tags$hr(style="border-color: black; margin-bottom: 6px"),
-                               edit_specification_ui('DataR_feature_specification')
+                               edit_specification_ui('DataR_feature_specification'),
+                               # the code below should go into the module itself!
+                               tags$head(tags$script('
+                                            // Define function to set height of "DataR_feature_specification-specification"
+                                            setHeight_DataR_feature_specification = function() {
+                                              var window_height = $(window).height();
+                                              var header_height = $(".main-header").height();
+                                              var boxHeight = (window_height - header_height) - 360;
+                                              $("#DataR_feature_specification-specification").height(boxHeight);
+                                            };
+                                            // Set input$box_height when the connection is established
+                                            $(document).on("shiny:connected", function(event) {
+                                              setHeight_DataR_feature_specification();
+                                            });
+                                            // Refresh the box height on every window resize event
+                                            $(window).on("resize", function(){
+                                              setHeight_DataR_feature_specification();
+                                            });
+                                          '))
                                ),
                       tabPanel('shinyAce',
                                fluidRow(
