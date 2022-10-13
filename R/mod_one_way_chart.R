@@ -57,6 +57,9 @@ viz_one_way_chart <- function(d, response, weight, show_labels, show_response, e
     }
     # check for SHAP cols
     if(all(c('min','perc_5','mean','perc_95','max') %in% names(d))) SHAP_cols <- TRUE else SHAP_cols <- FALSE
+    # remove rows with zero weight for plot (they make SHAP values look funny)
+    include <- d[[first_line_col-1]] > 0
+    d <- d[include]
     # check for LP col
     if('LP_mean' %in% names(d)) LP_col <- TRUE else LP_col <- FALSE
     # last non SHAP or LP line
@@ -225,6 +228,7 @@ viz_one_way_chart <- function(d, response, weight, show_labels, show_response, e
     if(SHAP_cols){
       # add SHAP ribbons
       # mean
+      # remove rows from d with NAs for SHAP values
       p <- p %>%
         add_trace(x = d[[1]], y = d[['mean']], type = 'scatter', mode = 'lines', yaxis = "y2",
                   line = list(color = 'rgba(200, 50, 50, 1.0)', dash = 'dot'),
