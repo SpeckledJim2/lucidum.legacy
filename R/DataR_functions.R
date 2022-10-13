@@ -100,14 +100,14 @@ feature_summary <- function(x){
     )
     summary <- data.table(metrics,value)
     summary[metrics=='Min', value := min(x,na.rm=TRUE)]
-    summary[metrics=='1st percentile', value := stats::quantile(x,prob=0.01,na.rm=TRUE)]
-    summary[metrics=='5th percentile', value := stats::quantile(x,prob=0.05,na.rm=TRUE)]
-    summary[metrics=='25th percentile', value := stats::quantile(x,prob=0.25,na.rm=TRUE)]
-    summary[metrics=='Median', value := stats::quantile(x,prob=0.50,na.rm=TRUE)]
+    summary[metrics=='1st percentile', value := stats::quantile(x,prob=0.01,na.rm=TRUE, type = 8)]
+    summary[metrics=='5th percentile', value := stats::quantile(x,prob=0.05,na.rm=TRUE, type = 8)]
+    summary[metrics=='25th percentile', value := stats::quantile(x,prob=0.25,na.rm=TRUE, type = 8)]
+    summary[metrics=='Median', value := stats::quantile(x,prob=0.50,na.rm=TRUE, type = 8)]
     summary[metrics=='Mean', value := mean(x, na.rm = TRUE)]
-    summary[metrics=='75th percentile', value := stats::quantile(x,prob=0.75,na.rm=TRUE)]
-    summary[metrics=='95th percentile', value := stats::quantile(x,prob=0.95,na.rm=TRUE)]
-    summary[metrics=='99th percentile', value := stats::quantile(x,prob=0.99,na.rm=TRUE)]
+    summary[metrics=='75th percentile', value := stats::quantile(x,prob=0.75,na.rm=TRUE, type = 8)]
+    summary[metrics=='95th percentile', value := stats::quantile(x,prob=0.95,na.rm=TRUE, type = 8)]
+    summary[metrics=='99th percentile', value := stats::quantile(x,prob=0.99,na.rm=TRUE, type = 8)]
     summary[metrics=='Max', value := max(x,na.rm=TRUE)]
     summary[metrics=='Standard deviation', value := stats::sd(x,na.rm=TRUE)]
     if(class(x)[1] %in% c('numeric')){
@@ -125,7 +125,10 @@ feature_summary <- function(x){
     }
   }
   if(class(x)[1] %in% c('IDate','POSIXct','Date')){
+    sd <- as.character(as.numeric(summary[nrow(summary), value]))
+    summary[nrow(summary), value := as.numeric(as.Date(value))]
     summary[, value := as.character(as.Date(value))]
+    summary[nrow(summary), value := sd]
   }
   summary
 }
@@ -220,7 +223,11 @@ kpi_numerator_denominator <- function(kpi, kpi_spec){
     if(nrow(kpi_spec)>0){
       numerator <- kpi_spec[kpi_name==kpi, kpi_numerator]
       denominator <- kpi_spec[kpi_name==kpi, kpi_denominator]
-      components <- list(numerator=numerator, denominator=denominator)
+      if(length(numerator)>1){ # multiple matches
+        components <- NULL
+      } else {
+        components <- list(numerator=numerator, denominator=denominator)
+      }
     } else {
       components <- NULL
     }
