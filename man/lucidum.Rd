@@ -2,11 +2,11 @@
 % Please edit documentation in R/functions.R
 \name{lucidum}
 \alias{lucidum}
-\title{Launch lucidum}
+\title{Launch Lucidum}
 \usage{
 lucidum(dataset = NULL, ...)
 }
 \description{
-Lanuch lucidum
+Launch Lucidum
 }
 \keyword{internal}
