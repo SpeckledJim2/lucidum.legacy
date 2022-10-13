@@ -1,6 +1,6 @@
 # app initialization and load dataset
-#' Launch lucidum
-#' @description Lanuch lucidum
+#' Launch Lucidum
+#' @description Launch Lucidum
 #' @keywords internal
 #' @export
 lucidum <- function(dataset=NULL, ...) {
