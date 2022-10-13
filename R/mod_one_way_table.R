@@ -470,7 +470,7 @@ viz_one_way_table <- function(d,
         }
       }
       # make the first column character ensuring not scientifc
-      if(class(d_summary[[1]])=='numeric'){
+      if('numeric' %in% class(d_summary[[1]])){
         d_summary[[1]] <- prettyNum(d_summary[[1]], scientific = FALSE)
       } else {
         d_summary[[1]] <- as.character(d_summary[[1]])
