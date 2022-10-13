@@ -164,6 +164,9 @@ ChartaR_server <- function(input, output, session, d, RVs){
         # set the number of bins, if NULL then plotly will automatically pick the number of bins
         num_bins <- as.numeric(input$ChartaR_histogram_num_bins)
         num_bins <- min(10000,num_bins)
+        # parse the log scale choice
+        x_scale <- ifelse(input$hist_log_scale %in% c('X axis','Both'), 'log','')
+        y_scale <- ifelse(input$hist_log_scale %in% c('Y axis','Both'), 'log','')
         # render the plot
         p <- plot_ly(x = ~values,
                      type = "histogram",
@@ -172,8 +175,8 @@ ChartaR_server <- function(input, output, session, d, RVs){
                      cumulative = list(enabled=as.logical(as.numeric(input$hist_inc_cum)))) %>%
           layout(hovermode = 'x') %>%
           layout(margin = list(l = 50, r = 50, b = 10, t = 70, pad = 4)) %>%
-          layout(xaxis = list(title = '')) %>%
-          layout(yaxis = list(title = NULL, type = input$hist_log_scale)) %>%
+          layout(xaxis = list(title = '', type = x_scale)) %>%
+          layout(yaxis = list(title = NULL, type = y_scale)) %>%
           layout(title = list(text = title, y = 0.95, font = list(size = 14))) %>%
           layout(bargap=0.1)
       }

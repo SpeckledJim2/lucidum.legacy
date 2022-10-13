@@ -156,12 +156,12 @@ ChartaR_ui <- function(){
                               column(
                                 width = 3,
                                 radioGroupButtons(
-                                label = 'y axis scale',
+                                label = 'log scale',
                                 inputId = "hist_log_scale",
-                                choices = c('Standard'='','Log scale'='log'),
+                                choices = c('-','X axis','Y axis','Both'),
                                 individual = FALSE,
                                 size = 'xs',
-                                selected = ''
+                                selected = '-'
                                 )
                               ),
                               column(
