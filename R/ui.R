@@ -7,7 +7,7 @@ action_button_style <- "color: #fff; background-color: #4bb03c; border-color: #3
 
 #### HEADER ####
 header <- dashboardHeader(
-  title = 'lucidum',
+  title = 'Lucidum',
   titleWidth = '280',
   # tags$li(
   #   class = "dropdown",
@@ -210,5 +210,5 @@ body <- dashboardBody(
 )
 
 #### UI ####
-ui <- dashboardPage(header, sidebar, body, title = 'lucidum')
+ui <- dashboardPage(header, sidebar, body, title = 'Lucidum')
 
