@@ -397,6 +397,10 @@ BoostaR_server <- function(input, output, session, d, RVs){
   observeEvent(c(BoostaR_model_index(), RVs$BoostaR_models), ignoreInit = TRUE, {
     # update the GBM model summary table
     dt <- BoostaR_model_summary(RVs$BoostaR_models)
+    # following siutation could occur if BoostaR_models loaded in manually from shinyAce
+    if(BoostaR_model_index()==0){
+      isolate(BoostaR_model_index(1))
+    }
     model_index <- BoostaR_model_index()
     updateActionButton(session, inputId = 'BoostaR_navigate', label = paste0('GBMs (', BoostaR_model_index(),'/',length(RVs$BoostaR_models),')'))
     output$BoostaR_model_summary <- DT::renderDT({
