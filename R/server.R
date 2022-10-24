@@ -109,7 +109,7 @@ server <- function(input, output, session) {
       }
     }
   })
-  observeEvent(c(d(), RVs$dt_update) , ignoreInit = TRUE, {
+  observeEvent(c(d(), RVs$dt_update, RVs$BoostaR_models) , ignoreInit = TRUE, {
     RVs$lucidum_cols <- setdiff(names(d()), original_cols())
     RVs$numerical_cols <- numerical_cols(d())
     table_lists <- return_global_env_tables()

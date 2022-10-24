@@ -70,7 +70,7 @@ selectInput_ui <- function(id, label = 'your_label', height_divisor, height_adj,
           style = 'padding: 6px 0px',
           inputId = ns('clear_selection'),
           label = NULL,
-          icon = icon("minus-circle")
+          icon = icon("circle-minus")
         )
       )
     ),

@@ -6,7 +6,7 @@ DataR_server <- function(input, output, session, d, RVs){
   filter_spec <- edit_specification_server('DataR_filter_specification', reactive(RVs$original_filter_spec), 'filter')
   output$DataR_dataset_viewer <- DT::renderDT (server = TRUE, {
     if(!is.null(d()) & !is.null(RVs$train_test_filter) & !is.null(RVs$user_filter)){
-      RVs$dt_update
+      RVs$dt_update # will trigger if this is changed
       rows_to_summarise <- which(RVs$train_test_filter*RVs$user_filter==1)
       d_filter <- d()[rows_to_summarise, ]
       if(input$DataR_dataset_transpose=='No'){

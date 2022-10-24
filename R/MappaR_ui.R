@@ -59,7 +59,7 @@ MappaR_ui <- function(){
                                    inputId = "MappaR_postcode",
                                    label = NULL,
                                    placeholder = "enter postcode area",
-                                   btnSearch = icon("search")
+                                   btnSearch = icon("magnifying-glass")
                                  )
                           )
                         ),
