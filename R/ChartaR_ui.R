@@ -93,7 +93,7 @@ ChartaR_ui <- function(){
                              radioGroupButtons(
                                inputId = "ChartaR_1W_y_transform",
                                label = "Response transform",
-                               choices = c('-', 'Log','Exp','Logit','Base'),
+                               choices = c('-', 'Log','Exp','Logit','0','1'),
                                individual = FALSE,
                                size = 'xs',
                                selected = '-'

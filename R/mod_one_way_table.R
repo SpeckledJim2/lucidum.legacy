@@ -238,7 +238,7 @@ viz_one_way_table <- function(d,
           # quarter
           banded <- 100*year(g) + floor((month(g)-1)/3)+1
           new_colname <- paste0(group_by_col, '_quarter')
-        } else if (banding>=10){
+        } else if (banding>=7){
           # year
           banded <- year(g)
           new_colname <- paste0(group_by_col, '_year')
@@ -416,7 +416,7 @@ viz_one_way_table <- function(d,
         d_summary[, first_col:ncol(d_summary)] <- exp(d_summary[, first_col:ncol(d_summary)])
       } else if (response_transform=='Logit'){
         d_summary[, first_col:ncol(d_summary)] <- log(d_summary[, first_col:ncol(d_summary)]/(1-d_summary[, first_col:ncol(d_summary)]))
-      } else if (response_transform=='Base'){
+      } else if (response_transform=='0'){
         base_level <- feature_spec$base_level[feature_spec$feature==original_group_by_col]
         if(!shiny::isTruthy(base_level)) base_level <- character(0)
         if(length(base_level)>0){
@@ -431,11 +431,26 @@ viz_one_way_table <- function(d,
             if(!is.null(SHAP_col)){
               denominator[, (c('min','perc_5','perc_95','max')) := mean] # what to adjust to the mean, not the percentiles
             }
-            if(link_glm %in% c('identity','logit')){
-              rebased_values <- as.data.table(mapply('-',d_summary[, .SD, .SDcols=cols], denominator))
-            } else {
-              rebased_values <- as.data.table(mapply('/',d_summary[, .SD, .SDcols=cols], denominator))
+            rebased_values <- as.data.table(mapply('-',d_summary[, .SD, .SDcols=cols], denominator))
+            d_summary[, (cols) := rebased_values]
+          }
+        }
+      } else if (response_transform=='1'){
+        base_level <- feature_spec$base_level[feature_spec$feature==original_group_by_col]
+        if(!shiny::isTruthy(base_level)) base_level <- character(0)
+        if(length(base_level)>0){
+          if(is.numeric(d[[original_group_by_col]])){
+            base_level <- as.numeric(base_level)
+            base_level_banded <- floor(base_level/banding) * banding
+          }
+          idx <- which(d_summary[[1]]==base_level)
+          if(length(idx)==1){
+            cols <- names(d_summary)[first_col:ncol(d_summary)]
+            denominator <- d_summary[idx, .SD, .SDcols = cols]
+            if(!is.null(SHAP_col)){
+              denominator[, (c('min','perc_5','perc_95','max')) := mean] # what to adjust to the mean, not the percentiles
             }
+            rebased_values <- as.data.table(mapply('/',d_summary[, .SD, .SDcols=cols], denominator))
             d_summary[, (cols) := rebased_values]
           }
         }

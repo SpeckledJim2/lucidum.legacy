@@ -91,7 +91,7 @@ banding_displayed <- function(b, date_response){
       'month'
     } else if (b==5){
       'quarter'
-    } else if (b>=10){
+    } else if (b>=7){
       'year'
     }
   }

@@ -143,11 +143,15 @@ modify_banding_level <- function (current_banding_level, modifier){
     overrule <- NA
     if(modifier==-1){
 
-      # couple of special rules to get 4 and 12 bandings in there (good for months/quarters)
+      # couple of special rules to get 4,7 and 12 bandings in there (good for days/months/quarters)
       if(current_banding_level==20){
         overrule <- 12
       } else if (current_banding_level==12){
         overrule <- 10
+      } else if (current_banding_level==10){
+        overrule <- 7
+      } else if (current_banding_level==7){
+        overrule <- 5
       } else if (current_banding_level==5){
         overrule <- 4
       } else if (current_banding_level==4){
@@ -169,6 +173,10 @@ modify_banding_level <- function (current_banding_level, modifier){
         overrule <- 4
       } else if (current_banding_level==4){
         overrule <- 5
+      } else if (current_banding_level==5){
+        overrule <- 7
+      } else if (current_banding_level==7){
+        overrule <- 10
       } else if (current_banding_level==10){
         overrule <- 12
       } else if (current_banding_level==12){
