@@ -24,14 +24,32 @@ BoostaR_server <- function(input, output, session, d, RVs){
   observeEvent(input$BoostaR_prev_model, {
     if(length(RVs$BoostaR_models)>0){
       b <- BoostaR_model_index()
-      BoostaR_model_index(max(1,b-1))
+      response <- RVs$BoostaR_models[[b]]$response
+      weight <- RVs$BoostaR_models[[b]]$weight
+      b_new <- max(1,b-1)
+      response_new <- RVs$BoostaR_models[[b_new]]$response
+      weight_new <- RVs$BoostaR_models[[b_new]]$weight
+      BoostaR_model_index(b_new)
+      # if the kpi is not changing, make sure there is still an update
+      if(b!=b_new & response==response_new & weight==weight_new){
+        RVs$dt_update <- RVs$dt_update + 1
+      }
     }
   })
   observeEvent(input$BoostaR_next_model, {
     if(length(RVs$BoostaR_models)>0){
       b <- BoostaR_model_index()
+      response <- RVs$BoostaR_models[[b]]$response
+      weight <- RVs$BoostaR_models[[b]]$weight
       n <- length(RVs$BoostaR_models)
-      BoostaR_model_index(min(n,b+1))
+      b_new <- min(n,b+1)
+      response_new <- RVs$BoostaR_models[[b_new]]$response
+      weight_new <- RVs$BoostaR_models[[b_new]]$weight
+      BoostaR_model_index(b_new)
+      # if the kpi is not changing, make sure there is still an update
+      if(b!=b_new & response==response_new & weight==weight_new){
+        RVs$dt_update <- RVs$dt_update + 1
+      }
     }
   })
   observeEvent(BoostaR_model_index(), ignoreInit = TRUE, {
@@ -44,11 +62,13 @@ BoostaR_server <- function(input, output, session, d, RVs){
       # update the parameters
       update_GBM_parameters(session, output, BoostaR_model)
       # update the ChartaR secondary column
-      lgbm_prediction <- NULL
-      d()[, lgbm_prediction := .SD, .SDcols = BoostaR_model$pred_col_name]
-      if(BoostaR_model$pred_col_name %in% names(d())){
-        updateSelectInput(session, inputId = 'ChartaR_1W_add_columns-selectInput', selected = BoostaR_model$pred_col_name)
+      if('lgbm_prediction' %in% names(d())){
+        d()[,lgbm_prediction:=NULL]
       }
+      lgbm_prediction <- NULL
+      pred_rows <- BoostaR_model$pred_rows
+      predictions <- BoostaR_model$predictions
+      d()[pred_rows, lgbm_prediction := predictions]
       # update the response and weight
       use_kpi <- FALSE
       # if(!is.null(BoostaR_model$kpi)){
@@ -355,6 +375,8 @@ BoostaR_server <- function(input, output, session, d, RVs){
                                   evaluation_log = evaluation_log,
                                   time = Sys.time(),
                                   pred_col_name = lgbm_results$pred_col_name,
+                                  pred_rows = lgbm_results$pred_rows,
+                                  predictions = lgbm_results$predictions,
                                   SHAP_rows = lgbm_results$SHAP_rows,
                                   SHAP_cols = lgbm_results$SHAP_cols
             )
@@ -469,54 +491,11 @@ BoostaR_server <- function(input, output, session, d, RVs){
       }
     }
   })
-  output$BoostaR_SHAP_SD <- renderUI({
-    SHAP <- NULL
-    SHAP_1 <- NULL
-    SHAP_2 <- NULL
-    cor <- NULL
-    BoostaR_model_index() # so recalcs when this is changed
-    f1 <- input$BoostaR_SHAP_feature_1
-    f2 <- input$BoostaR_SHAP_feature_2
-    weight <- input$weight
-    if(!is.null(d()) & !is.null(f1) & !is.null(weight)){
-      if(weight=='N'){
-        idx <- 1:nrow(d())
-      } else {
-        idx <- which(d()[[weight]]>0)
-      }
-      if(is.null(f2)) f2 <- 'none'
-      if(f2=='none'){
-        col1 <- paste0('lgbm_SHAP_', f1)
-        cols <- c(col1)
-        d_cols <- d()[idx,.SD,.SDcols=cols]
-        setnames(d_cols, 'SHAP')
-        SHAP_sd <- d_cols[, stats::sd(SHAP)]
-        text <- paste0('<b>sd: </b>', round(SHAP_sd, 4))
-        result <- p(HTML(text), style = 'font-size: 14px; margin-top: 15px')
-      } else {
-        col1 <- paste0('lgbm_SHAP_', f1)
-        col2 <- paste0('lgbm_SHAP_', f2)
-        cols <- c(col1, col2)
-        d_cols <- d()[idx,.SD,.SDcols=cols]
-        setnames(d_cols, c('SHAP_1','SHAP_2'))
-        d_cols[, SHAP := SHAP_1+SHAP_2]
-        SHAP_sd <- d_cols[, stats::sd(SHAP)]
-        SHAP_corr <- cor(d_cols[['SHAP_1']], d_cols[['SHAP_2']])
-        text <- paste0('<b>sd: </b>', round(SHAP_sd, 4), '<b> cor: </b>', round(SHAP_corr,4))
-        result <- p(HTML(text), style = 'font-size: 14px; margin-top: 15px')
-      }
-    } else {
-      SHAP_sd <- 0
-      text <- paste0('<b>sd: </b>', round(SHAP_sd, 4))
-      result <- p(HTML(text), style = 'font-size: 14px; margin-top: 15px')
-    }
-    result
-  })
   output$BoostaR_SHAP_plot <- plotly::renderPlotly({
     # plot for most recent model
     BoostaR_model_index() # so recalcs when this is changed
     if(length(RVs$BoostaR_models)>0){
-      lgbm <- RVs$BoostaR_models[[length(RVs$BoostaR_models)]]
+      lgbm <- RVs$BoostaR_models[[BoostaR_model_index()]]
       viz_SHAP_chart(d(),
                      lgbm$weight,
                      input$BoostaR_SHAP_feature_1,
@@ -526,6 +505,9 @@ BoostaR_server <- function(input, output, session, d, RVs){
                      input$BoostaR_SHAP_feature_1_factor,
                      input$BoostaR_SHAP_feature_2_factor,
                      input$BoostaR_SHAP_quantile,
+                     input$BoostaR_SHAP_rebase,
+                     input$BoostaR_SHAP_ribbons,
+                     RVs$feature_spec,
                      input$dimension)
     }
   })
@@ -644,7 +626,26 @@ BoostaR_server <- function(input, output, session, d, RVs){
       model_index <- BoostaR_model_index()
       if(!is.na(model_index)){
         gain_summary <- RVs$BoostaR_models[[model_index]]$gain_summary
-        n_rows <- pmin(100, nrow(gain_summary))
+        original_n_rows <- nrow(gain_summary)
+        # filter rows
+        if(input$BoostaR_search_gain_table!=''){
+          keep_rows <- grepl(input$BoostaR_search_gain_table, gain_summary$tree_features)
+          gain_summary <- gain_summary[keep_rows]
+          # update the tree selector
+          tree_table <- RVs$BoostaR_models[[model_index]]$tree_table
+          match_rows <- grepl(input$BoostaR_search_gain_table,tree_table$split_feature)
+          if(all(!match_rows)){
+            first_tree <- 0
+          } else {
+            first_tree <- tree_table[which.max(match_rows)][['tree_index']]
+          }
+          updateSliderInput(session, 'BoostaR_tree_selector', value = first_tree)
+        }
+        # limit number of rows
+        n_rows <- pmin(1000, nrow(gain_summary))
+        # display how many rows
+        col_text <- paste0('tree_features (',n_rows,' of ',original_n_rows,')')
+        names(gain_summary)[1] <- col_text
         gain_summary[1:n_rows,] %>%
           DT::datatable(rownames= FALSE,
                         selection = 'single',

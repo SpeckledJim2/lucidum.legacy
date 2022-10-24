@@ -76,17 +76,17 @@ BoostaR_ui <- function(){
                              actionButton(
                                inputId = "BoostaR_add_features",
                                label = 'all',
-                               icon = icon("plus-circle")
+                               icon = icon("circle-plus")
                              ),
                              actionButton(
                                inputId = "BoostaR_clear_features",
                                label = 'all',
-                               icon = icon("minus-circle")
+                               icon = icon("circle-minus")
                              ),
                              actionButton(
                                inputId = "BoostaR_clear_interaction_groups",
                                label = 'int groups',
-                               icon = icon("minus-circle")
+                               icon = icon("circle-minus")
                              ),
                              actionButton(
                                inputId = "BoostaR_goto_ChartaR",
@@ -120,6 +120,7 @@ BoostaR_ui <- function(){
                                  inputId = 'BoostaR_additional_parameters',
                                  value =
 '#boosting: gbdt
+#tweedie_variance_power: 1.5
 #objective: gamma
 #metric: gamma
 #tree_learner: serial
@@ -213,7 +214,6 @@ BoostaR_ui <- function(){
 #alpha: 0.9
 #fair_c: 1
 #poisson_max_delta_step: 0.7
-#tweedie_variance_power: 1.5
 #lambdarank_truncation_level: 30
 #lambdarank_norm: TRUE
 #label_gain:
@@ -393,7 +393,7 @@ BoostaR_ui <- function(){
                          width = 6,
                          fluidRow(
                            column(
-                             width = 6,
+                             width = 2,
                              actionButton(
                                inputId = "BoostaR_gain_table_goto_ChartaR",
                                icon = icon('chart-line'),
@@ -402,6 +402,15 @@ BoostaR_ui <- function(){
                            ),
                            column(
                              width = 6,
+                             textInput(
+                               'BoostaR_search_gain_table',
+                               label = NULL,
+                               width = '100%',
+                               placeholder = 'select feature'
+                             )
+                           ),
+                           column(
+                             width = 4,
                              align = 'right',
                              shinyFiles::shinySaveButton(
                                id = 'BoostaR_save_model',
@@ -452,12 +461,7 @@ BoostaR_ui <- function(){
                                choices = c('<','0.01','0.1','1','5','10','50','100','>'),
                                individual = FALSE,
                                size = 'xs',
-                               selected = -1),
-                             checkboxInput(
-                               inputId = 'BoostaR_SHAP_feature_1_factor',
-                               label = 'Treat as factor',
-                               value = FALSE
-                               )
+                               selected = -1)
                              ),
                            column(
                              width = 4,
@@ -468,8 +472,8 @@ BoostaR_ui <- function(){
                                choices = c('-','0.1%','0.5%','1%','2%','5%'),
                                individual = FALSE,
                                size = 'xs',
-                               selected = '1%'),
-                             htmlOutput('BoostaR_SHAP_SD')
+                               selected = '1%')
+                             #htmlOutput('BoostaR_SHAP_SD')
                            ),
                            column(
                              width = 4,
@@ -480,7 +484,43 @@ BoostaR_ui <- function(){
                                choices = c('<','0.01','0.1','1','5','10','50','100','>'),
                                individual = FALSE,
                                size = 'xs',
-                               selected = -1),
+                               selected = -1)
+                             )
+                         ),
+                         fluidRow(
+                           column(
+                             width = 3,
+                             style = 'margin-top:-10px',
+                             checkboxInput(
+                               inputId = 'BoostaR_SHAP_feature_1_factor',
+                               label = 'Treat as factor',
+                               value = FALSE
+                               )
+                             ),
+                           column(
+                             width = 3,
+                             radioGroupButtons(
+                               inputId = 'BoostaR_SHAP_rebase',
+                               label = NULL,
+                               choices = c('-','0','1'),
+                               individual = FALSE,
+                               size = 'xs',
+                               selected = '-')
+                             ),
+                           column(
+                             width = 3,
+                             radioGroupButtons(
+                               inputId = 'BoostaR_SHAP_ribbons',
+                               label = NULL,
+                               choices = c('Mean','25_75','5_95','All'),
+                               individual = FALSE,
+                               size = 'xs',
+                               selected = 'All')
+                             ),
+                           column(
+                             width = 3,
+                             style = 'margin-top:-10px',
+                             align = 'right',
                              checkboxInput(
                                inputId = 'BoostaR_SHAP_feature_2_factor',
                                label = 'Treat as factor',

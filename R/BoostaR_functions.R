@@ -186,6 +186,8 @@ build_lgbm <- function(d, init_score, response, weight, features, params, SHAP_s
            model = NULL,
            rules = NULL,
            pred_col_name = NULL,
+           pred_rows = NULL,
+           predictions = NULL,
            SHAP_rows = NULL,
            SHAP_cols = NULL,
            run_time = NULL
@@ -197,6 +199,8 @@ build_lgbm <- function(d, init_score, response, weight, features, params, SHAP_s
            model = lgbm,
            rules = d_convert$rules,
            pred_col_name = pred_col_name,
+           pred_rows = rows_idx,
+           predictions = preds,
            SHAP_rows = SHAP_rows,
            SHAP_cols = SHAP_cols,
            run_time = run_time
@@ -590,7 +594,7 @@ band_var <- function(x, q, b){
   upper_cutoff <- stats::quantile(x, prob = 1-q, na.rm = TRUE)
   pmax(lower_cutoff, pmin(upper_cutoff, floor(x/b) * b))
 }
-viz_SHAP_chart <- function(d, weight, feature_1, feature_2, banding_1, banding_2, factor_1, factor_2, SHAP_quantile, dimensions){
+viz_SHAP_chart <- function(d, weight, feature_1, feature_2, banding_1, banding_2, factor_1, factor_2, SHAP_quantile, rebase, SHAP_ribbons, feature_spec, dimensions){
   # SHAP cols is all the column names containing lgbm_SHAP_
   # idx is the index of the rows used to build the LGBM
   # below is default for
@@ -628,10 +632,10 @@ viz_SHAP_chart <- function(d, weight, feature_1, feature_2, banding_1, banding_2
       # 1D chart
       if(c1 %in% c('integer','numeric') & !factor_1){
         # flame chart by bands
-        p <- SHAP_flame(d[idx], weight, feature_1, banding_1, q, chart_height)
+        p <- SHAP_flame(d[idx], weight, feature_1, banding_1, q, rebase, SHAP_ribbons, feature_spec, chart_height)
       } else {
         # box and whisker in descending order by mean SHAP
-        p <- SHAP_box_and_whisker(d[idx], weight, feature_1, banding_1, factor_1, q, chart_height)
+        p <- SHAP_box_and_whisker(d[idx], weight, feature_1, banding_1, factor_1, q, rebase, feature_spec, chart_height)
       }
     } else {
       # 2D chart
@@ -649,7 +653,7 @@ viz_SHAP_chart <- function(d, weight, feature_1, feature_2, banding_1, banding_2
   }
   return(p)
 }
-SHAP_flame <- function(d, weight, feature_1, banding_1, q, chart_height){
+SHAP_flame <- function(d, weight, feature_1, banding_1, q, rebase, SHAP_ribbons, feature_spec, chart_height){
   col1 <- paste0('lgbm_SHAP_', feature_1)
   banded <- band_var(d[[feature_1]], q, banding_1)
   SHAP_summary <- d[,c(min = lapply(.SD, min, na.rm = TRUE),
@@ -662,53 +666,101 @@ SHAP_flame <- function(d, weight, feature_1, banding_1, q, chart_height){
   ),
   banded,
   .SDcols = col1]
-  names(SHAP_summary)[2:8] <- c('min','perc_5','perc_25','mean','perc_75','perc_95','max')
+  cols <- c('min','perc_5','perc_25','mean','perc_75','perc_95','max')
+  names(SHAP_summary)[2:8] <- cols
   setorderv(SHAP_summary, names(SHAP_summary)[1])
+  # apply response transform
+  base_level <- feature_spec$base_level[feature_spec$feature==feature_1]
+  if(!shiny::isTruthy(base_level)) base_level <- character(0)
+  base_adj <- NA
+  if(length(base_level)>0){
+      base_level <- as.numeric(base_level)
+      base_level_banded <- as.numeric(band_var(base_level, q, banding_1))
+      idx <- which(SHAP_summary[[1]]==base_level_banded)
+      base_adj <- SHAP_summary[['mean']][idx]
+  }
+  if(rebase=='0'){
+    if(!is.na(base_adj)){
+      SHAP_summary[,(cols):=.SD-base_adj,.SDcols=cols]
+    }
+  } else if(rebase=='1'){
+    if(is.na(base_adj)){
+      SHAP_summary[,(cols):=exp(.SD),.SDcols=cols]
+    } else {
+      SHAP_summary[,(cols):=exp(.SD-base_adj),.SDcols=cols]
+    }
+  }
   p <- plot_ly(height = chart_height)
   p <- p %>%
     add_trace(x = SHAP_summary[[1]], y = SHAP_summary[['mean']], type = 'scatter', mode = 'lines', yaxis = "y1",
               line = list(color = 'rgba(200, 50, 50, 1.0)', dash = 'dot'),
               showlegend = TRUE, name = 'SHAP_mean')
   # 5th-95th percentiles
-  p <- p %>%
-    add_trace(x = SHAP_summary[[1]], y = SHAP_summary[['perc_5']], type = 'scatter', mode = 'lines', yaxis = "y1",
-              fillcolor='rgba(200, 50, 50, 0.3)', line = list(color = 'rgba(200, 50, 50, 0.0)'),
-              showlegend = FALSE, name = 'SHAP_5') %>%
-    add_trace(x = SHAP_summary[[1]], y = SHAP_summary[['perc_95']], type = 'scatter', mode = 'lines', yaxis = "y1",
-              fill = 'tonexty', fillcolor='rgba(200, 50, 50, 0.3)', line = list(color = 'rgba(200, 50, 50, 0.0)'),
-              showlegend = TRUE, name = 'SHAP_5_95')
+  if(SHAP_ribbons %in% c('All','5_95')){
+    p <- p %>%
+      add_trace(x = SHAP_summary[[1]], y = SHAP_summary[['perc_5']], type = 'scatter', mode = 'lines', yaxis = "y1",
+                fillcolor='rgba(200, 50, 50, 0.3)', line = list(color = 'rgba(200, 50, 50, 0.0)'),
+                showlegend = FALSE, name = 'SHAP_5') %>%
+      add_trace(x = SHAP_summary[[1]], y = SHAP_summary[['perc_95']], type = 'scatter', mode = 'lines', yaxis = "y1",
+                fill = 'tonexty', fillcolor='rgba(200, 50, 50, 0.3)', line = list(color = 'rgba(200, 50, 50, 0.0)'),
+                showlegend = TRUE, name = 'SHAP_5_95')
+  }
   # 25th-75th percentiles
-  p <- p %>%
-    add_trace(x = SHAP_summary[[1]], y = SHAP_summary[['perc_25']], type = 'scatter', mode = 'lines', yaxis = "y1",
-              fillcolor='rgba(200, 50, 50, 0.3)', line = list(color = 'rgba(200, 50, 50, 0.0)'),
-              showlegend = FALSE, name = 'SHAP_25') %>%
-    add_trace(x = SHAP_summary[[1]], y = SHAP_summary[['perc_75']], type = 'scatter', mode = 'lines', yaxis = "y1",
-              fill = 'tonexty', fillcolor='rgba(200, 50, 50, 0.2)', line = list(color = 'rgba(200, 50, 50, 0.0)'),
-              showlegend = TRUE, name = 'SHAP_25_75')
+  if(SHAP_ribbons %in% c('All','25_75','5_95')){
+    p <- p %>%
+      add_trace(x = SHAP_summary[[1]], y = SHAP_summary[['perc_25']], type = 'scatter', mode = 'lines', yaxis = "y1",
+                fillcolor='rgba(200, 50, 50, 0.3)', line = list(color = 'rgba(200, 50, 50, 0.0)'),
+                showlegend = FALSE, name = 'SHAP_25') %>%
+      add_trace(x = SHAP_summary[[1]], y = SHAP_summary[['perc_75']], type = 'scatter', mode = 'lines', yaxis = "y1",
+                fill = 'tonexty', fillcolor='rgba(200, 50, 50, 0.2)', line = list(color = 'rgba(200, 50, 50, 0.0)'),
+                showlegend = TRUE, name = 'SHAP_25_75')
+  }
   # min to max SHAP
-  p <- p %>%
-    add_trace(x = SHAP_summary[[1]], y = SHAP_summary[['min']], type = 'scatter', mode = 'lines', yaxis = "y1",
-              fillcolor='rgba(200, 50, 50, 0.1)', line = list(color = 'rgba(200, 50, 50, 0.0)'),
-              showlegend = FALSE, name = 'SHAP_min') %>%
-    add_trace(x = SHAP_summary[[1]], y = SHAP_summary[['max']], type = 'scatter', mode = 'lines', yaxis = "y1",
-              fill = 'tonexty', fillcolor='rgba(200, 50, 50, 0.1)', line = list(color = 'rgba(200, 50, 50, 0.0)'),
-              showlegend = TRUE, name = 'SHAP_min_max')
+  if(SHAP_ribbons %in% c('All')){
+    p <- p %>%
+      add_trace(x = SHAP_summary[[1]], y = SHAP_summary[['min']], type = 'scatter', mode = 'lines', yaxis = "y1",
+                fillcolor='rgba(200, 50, 50, 0.1)', line = list(color = 'rgba(200, 50, 50, 0.0)'),
+                showlegend = FALSE, name = 'SHAP_min') %>%
+      add_trace(x = SHAP_summary[[1]], y = SHAP_summary[['max']], type = 'scatter', mode = 'lines', yaxis = "y1",
+                fill = 'tonexty', fillcolor='rgba(200, 50, 50, 0.1)', line = list(color = 'rgba(200, 50, 50, 0.0)'),
+                showlegend = TRUE, name = 'SHAP_min_max')
+  }
   # formatting
   p <- p %>% layout(title = list(y= 0.98, text = boldify(paste0('SHAP flame plot: ',feature_1)), font = list(size = 16, face='bold')))
   return(p)
 }
-SHAP_box_and_whisker <- function(d, weight, feature_1, banding_1, factor_1, q, chart_height){
+SHAP_box_and_whisker <- function(d, weight, feature_1, banding_1, factor_1, q, rebase, feature_spec, chart_height){
   banded_1 <- NULL
   col1 <- paste0('lgbm_SHAP_', feature_1)
   cols <- c(feature_1, col1)
   d_cols <- d[,.SD,.SDcols=cols]
   setnames(d_cols, c('feature_1','SHAP'))
+  # get base level
+  base_level <- feature_spec$base_level[feature_spec$feature==feature_1]
   if(factor_1 & (class(d[[feature_1]]) %in% c('integer','numeric'))){
+    base_level <- as.numeric(base_level)
     d_cols[, banded_1 := band_var(feature_1, q, banding_1)]
+    base_level <- band_var(base_level, q, banding_1)
   } else {
     d_cols[, banded_1 := feature_1]
   }
+  # mean SHAP
   mean_SHAP <- d_cols[, lapply(.SD, mean, na.rm = TRUE), by = banded_1, .SDcols = 'SHAP']
+  # base adjustment
+  if(!shiny::isTruthy(base_level)) base_level <- character(0)
+  base_adj <- NA
+  if(length(base_level)>0){
+    idx <- which(mean_SHAP[[1]]==base_level)
+    base_adj <- mean_SHAP[['SHAP']][idx]
+  } else {
+    base_adj <- 0
+  }
+  # rebase
+  if(rebase=='0'){
+    d_cols[,2] <- d_cols[,2] - base_adj
+  } else if(rebase=='1'){
+    d_cols[,2] <- exp(d_cols[,2]-base_adj)
+  }
   # reorder plot by mean_SHAP
   setorderv(mean_SHAP, 'SHAP', order = -1)
   xform <- list(autotick = TRUE,
