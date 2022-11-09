@@ -191,16 +191,20 @@ residual_error <- function(d, idx, features, actual_col, fitted_col, weight_col,
   return(list('all' = r, 'train' = r_train, 'test' = r_test))
 }
 combine_filters <- function(filters, operation){
-  if(operation=='Logical AND'){
+  if(operation %in% c('AND','NAND')){
     op <- ' & '
-  } else if (operation=='Logical OR'){
+  } else if (operation %in% c('OR','NOR')){
     op <- ' | '
   }
   if(is.null(filters)){
-    filters
+    filter_expression <- filters
   } else if(length(filters)==1){
-    filters
+    filter_expression <- filters
   } else {
-    paste(filters, collapse = op)
+    filter_expression <- paste(filters, collapse = op)
   }
+  if(operation %in% c('NAND','NOR')){
+    filter_expression <- paste0('!(',filter_expression,')')
+  }
+  filter_expression
 }

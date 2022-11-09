@@ -169,7 +169,7 @@ sidebar <- dashboardSidebar(
       radioGroupButtons(
         inputId = "filter_operation",
         label = NULL,
-        choices = c('Logical AND','Logical OR'),
+        choices = c('AND','OR','NAND','NOR'),
         individual = FALSE,
         size = 'xs',
         justified = TRUE
