@@ -22,17 +22,19 @@ MappaR_server <- function(input, output, session, d, RVs){
       setView(lng=-1,lat=54.81,zoom=6)
   })
   observe({
-    withProgress(message = 'MappaR', detail = 'redrawing map', value = 0.5,{
-      viz_render_map('MappaR_uk_map',
-                     session,
-                     input,
-                     d(),
-                     RVs$kpi_spec,
-                     first_map_redraw(),
-                     RVs$train_test_filter,
-                     RVs$user_filter,
-                     plot_postcode_area())
-    })
+    if(input$tabs=='MappaR'){
+      withProgress(message = 'MappaR', detail = 'redrawing map', value = 0.5,{
+        viz_render_map('MappaR_uk_map',
+                       session,
+                       input,
+                       d(),
+                       RVs$kpi_spec,
+                       first_map_redraw(),
+                       RVs$train_test_filter,
+                       RVs$user_filter,
+                       plot_postcode_area())
+      })
+    }
   })
   observeEvent(input$tabs,{
     if(input$tabs=='MappaR' & first_map_redraw()){
