@@ -192,13 +192,13 @@ BoostaR_server <- function(input, output, session, d, RVs){
   observeEvent(input$BoostaR_grid_search, {
     if(input$BoostaR_grid_search=='Off'){
       learning_rate <- 0.3
-      num_leaves <- 2
+      num_leaves <- 5
       max_depth <- 4
       col_sample_rate <- 1
       row_sample_rate <- 1
     } else {
       learning_rate <- c(0.1,0.5)
-      num_leaves <- c(1,5)
+      num_leaves <- c(2,5)
       max_depth <- c(3,6)
       col_sample_rate <- c(0.5,1.0)
       row_sample_rate <- c(0.5,1.0)
