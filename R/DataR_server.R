@@ -9,40 +9,32 @@ DataR_server <- function(input, output, session, d, RVs){
       RVs$dt_update # will trigger if this is changed
       rows_to_summarise <- which(RVs$train_test_filter*RVs$user_filter==1)
       d_filter <- d()[rows_to_summarise, ]
-      if(input$DataR_dataset_transpose=='No'){
-        if(nrow(d_filter)>100){
-          if(input$DataR_dataset_sample=='Head'){
-            d_display <- utils::head(d_filter, 100)
-          } else if(input$DataR_dataset_sample=='Sample') {
-            d_display <- d_filter[sample(1:.N, 100, replace = FALSE), ]
-          }
-        } else {
-          d_display <- copy(d_filter)
-        }
-        pg_length <- min(100, nrow(d_filter))
-      } else if (input$DataR_dataset_transpose=='Yes'){
-        if(nrow(d_filter)>10){
-          if(input$DataR_dataset_sample=='Head'){
-            d_display <- utils::head(d_filter, 10)
-            idx <- 1:10
-          } else if(input$DataR_dataset_sample=='Sample') {
-            idx <- sort(sample(1:nrow(d_filter), 10, replace = FALSE))
-            d_display <- d_filter[idx, ]
-          }
+      max_rows_to_display <- 100
+      max_cols <- 100
+      if(input$DataR_dataset_transpose==FALSE){
+        d_display <- copy(d_filter)
+        pg_length <- min(max_rows_to_display, nrow(d_filter))
+      } else if (input$DataR_dataset_transpose==TRUE){
+        if(nrow(d_filter)>max_cols){
+          idx <- 1:max_cols
+          d_display <- utils::head(d_filter, max_cols)
         } else {
           idx <- 1:nrow(d_filter)
           d_display <- copy(d_filter)
         }
         d_display <- cbind(data.table(col = names(d_display), t(d_display)))
         names(d_display) <- c('dataset_column', as.character(idx))
-        pg_length <- min(5000, nrow(d_display))
+        pg_length <- min(1000, nrow(d_display))
       }
-      d_display %>%
+      #pg_length <- min(max_rows_to_display, nrow(d_display))
+      # need to figure out a better way to limit number of columns shown as gets very slow
+      n_col <- pmin(max_cols, ncol(d_display))
+      d_display[, 1:n_col] %>%
         DT::datatable(rownames= FALSE,
                       extensions = 'Buttons',
                       class = 'white-space: nowrap',
                       options = list(pageLength = pg_length,
-                                     dom = 'rti',
+                                     dom = 'Brtip',
                                      scrollX = T,
                                      scrollY = 'calc(100vh - 316px)',
                                      searchHighlight=TRUE

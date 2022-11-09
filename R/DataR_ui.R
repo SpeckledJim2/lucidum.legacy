@@ -3,25 +3,14 @@ DataR_ui <- function(){
   tabItem("DataR",
           tabsetPanel(id = 'DataR_tabsetPanel',
                       tabPanel('Dataset viewer',
-                               br(),
                                fluidRow(
                                  column(
-                                   width = 3,
-                                   radioGroupButtons(
-                                     inputId = 'DataR_dataset_sample',
-                                     label = 'Display rows',
-                                     choices = c('Head','Sample'),
-                                     selected = 'Head'
-                                   )
-                                 ),
-                                 column(
-                                   width = 3,
-                                   radioGroupButtons(
-                                     inputId = 'DataR_dataset_transpose',
-                                     label = 'Transpose',
-                                     choices = c('No','Yes'),
-                                     selected = 'Yes'
-                                   )
+                                   width = 12,
+                                   align = 'right',
+                                   checkboxInput(inputId='DataR_dataset_transpose',
+                                                 label='Transpose',
+                                                 value = FALSE
+                                                 )
                                  )
                                ),
                                fluidRow(
