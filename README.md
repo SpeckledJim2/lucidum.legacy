@@ -1,6 +1,8 @@
 
 # 1. lucidum
 
+This is the legacy version of lucidum.  For the latest version please visit https://github.com/SpeckledJim2/lucidum
+
 lucidum is an open source R Shiny app to help users build and communicate GLMs and GBMs without writing code.  
 
 lucidum works with standard R data.frames and data.tables and is designed to make model building more interactive,  visual and insightful.
@@ -54,7 +56,7 @@ You can install the development version of lucidum from [GitHub](https://github.
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("SpeckledJim2/lucidum")
+devtools::install_github("SpeckledJim2/lucidum.legacy")
 ```
 
 ## 3. Load a dataset into lucidum
@@ -62,14 +64,14 @@ devtools::install_github("SpeckledJim2/lucidum")
 Option 1: use the dropdown menu to choose a data.frame or data.table to load into lucidum
 
 ``` r
-library(lucidum)
+library(lucidum.legacy)
 lucidum()
 ```
 
 Option 2: supply the data.frame or data.table name as an argument to lucidum
 
 ``` r
-library(lucidum)
+library(lucidum.legacy)
 lucidum(your_dataframe_name)
 ```
 ## 4. lucidum navigation
@@ -105,18 +107,18 @@ There are three types of specification files:
 Save the specification files in folders called: “kpi_specifications”, “filter_specifications” and “feature_specifications”.  
 Specification files should have the same name as your dataset, i.e. if the dataset is called “football” the specification files should be called “football.csv”
 
-Set the path to the specification files before running library(lucidum) or it won’t pick up the path:
+Set the path to the specification files before running library(lucidum.legacy) or it won’t pick up the path:
 ``` r
 	options(lucidum=list(specification_path=“my_path”))
-	library(lucidum)
+	library(lucidum.legacy)
 	lucidum(my_dt)
 ```
 
 If you want to change the path without restarting R, you need to detach lucidum and reload the library:
 ``` r
-	detach("package:lucidum", unload = TRUE)
+	detach("package:lucidum.legacy", unload = TRUE)
 	options(lucidum=list(specification_path=“my_different_path”))
-	library(lucidum)
+	library(lucidum.legacy)
 ```
 
 ## 7. lucidum tips
@@ -143,6 +145,6 @@ If you want to change the path without restarting R, you need to detach lucidum 
 * **Bugs**
   - You can change the displayed dataset freely (using the top right control) before building any models, but once you have built a model avoid changing the dataset as you can’t in general apply a model built on dataset A to dataset B.
   - There is no error checking for invalid monotonicity parameters or additional parameters in BoostaR – if you use something incorrect LightGBM will throw an error and the app will stop.
-  - shinyAce doesn’t start automatically when first loading lucidum.  A workaround is to run the command shinyAce::aceEditor(outputId = NULL) in the console before library(lucidum).
+  - shinyAce doesn’t start automatically when first loading lucidum.  A workaround is to run the command shinyAce::aceEditor(outputId = NULL) in the console before library(lucidum.legacy).
   - The 10k option for SHAP values generates the SHAP values correctly for a random 10k sample of the data, but the SHAP ribbons don’t yet display correctly in ChartaR.
   - R GLMs store the entire modelling dataset by default as part of the model object.  When you save a dataset out from GlimmaR, lucidum strips the dataset from the .RDS glm object to make the file a sensible size.  However, this stripping out doesn’t occur until the model is saved and so if several GLMs are built within GlimmaR on very large datasets RAM usage will increase.
