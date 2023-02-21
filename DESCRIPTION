@@ -1,4 +1,4 @@
-Package: lucidum
+Package: lucidum.legacy
 Title: Code free GLM and GBM
 Version: 0.0.0.9012
 Authors@R: 
